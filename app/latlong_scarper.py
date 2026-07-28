@@ -34,4 +34,4 @@ for sector in range(1, 116):
     df = pd.concat([df, new_row], ignore_index=True)
 
 # Save DataFrame
-df.to_csv(r"D:\vs code projects\rental_analysis\pages\latlong.csv", index=False)
+df.to_csv(r"D:\vs code projects\rental_analysis\app\latlong.csv", index=False)
