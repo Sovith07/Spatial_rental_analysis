@@ -7,11 +7,11 @@ st.set_page_config(page_title="Viz Demo")
 
 
 
-with open('df.pkl','rb') as file:
-    df = pickle.load(file)
-
-with open('pipeline.pkl','rb') as file:
+with open(r'D:\vs code projects\rental_analysis\model\pipeline.pkl','rb') as file:
     pipeline = pickle.load(file)
+
+with open(r'D:\vs code projects\rental_analysis\model\df.pkl','rb') as file:
+    df = pickle.load(file)
 
 
 st.header('Enter your inputs')
