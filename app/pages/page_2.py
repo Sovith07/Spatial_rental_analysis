@@ -5,16 +5,17 @@ import pickle
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import seaborn as sns
+import ast
 
 st.set_page_config(page_title="Plotting Demo")
 
 st.title('Analytics')
 
-new_df = pd.read_csv('datasets/data_viz1.csv')
-feature_text = pickle.load(open('datasets/feature_text.pkl','rb'))
+new_df = pd.read_csv(r'D:\vs code projects\rental_analysis\app\data_viz1.csv')
+feature_text = pickle.load(open(r'D:\vs code projects\rental_analysis\app\feature_text.pkl','rb'))
+wordcloud_df=pd.read_csv(r'D:\vs code projects\rental_analysis\app\wordcloud.csv')
 
-
-group_df = new_df.groupby('sector').mean()[['price','price_per_sqft','built_up_area','latitude','longitude']]
+group_df = new_df.groupby('sector')[['price','price_per_sqft','built_up_area','latitude','longitude']].mean()
 
 st.header('Sector Price per Sqft Geomap')
 fig = px.scatter_mapbox(group_df, lat="latitude", lon="longitude", color="price_per_sqft", size='built_up_area',
@@ -23,18 +24,67 @@ fig = px.scatter_mapbox(group_df, lat="latitude", lon="longitude", color="price_
 
 st.plotly_chart(fig,use_container_width=True)
 
+sector = sorted(wordcloud_df['sector'].unique().tolist())
+sector.insert(0,'overall')
+
+selected_sector = st.selectbox('Select Sector', sector)
 st.header('Features Wordcloud')
 
-wordcloud = WordCloud(width = 800, height = 800,
-                      background_color ='black',
+if selected_sector == 'overall':
+  main = []
+  for item in wordcloud_df['features'].dropna().apply(ast.literal_eval):
+    main.extend(item)
+  feature_text = ' '.join(main)
+  plt.rcParams["font.family"] = "Arial"   
+  wordcloud = WordCloud(width = 800, height = 800, 
+                        background_color ='white', 
+                        stopwords = set(['s']),  # Any stopwords you'd like to exclude
+                        min_font_size = 10).generate(feature_text)
+  
+     
+  # Create figure
+  fig, ax = plt.subplots(figsize=(8, 8))
+  
+  # Display word cloud
+  ax.imshow(wordcloud, interpolation="bilinear")
+  ax.axis("off")
+  
+  # Remove extra padding
+  fig.tight_layout(pad=0)
+  
+  # Display in Streamlit
+  st.pyplot(fig)
+
+else:
+  def wordcloud_bysector(sector):
+   
+    main = []
+    for item in wordcloud_df[(wordcloud_df['features'].notna() ) & (wordcloud_df['sector']==sector)]['features'].dropna().apply(ast.literal_eval):
+     main.extend(item)
+
+    feature_text = ' '.join(main)
+    plt.rcParams["font.family"] = "Arial"
+
+    wordcloud = WordCloud(width = 800, height = 800, 
+                      background_color ='white', 
                       stopwords = set(['s']),  # Any stopwords you'd like to exclude
                       min_font_size = 10).generate(feature_text)
 
-plt.figure(figsize = (8, 8), facecolor = None)
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis("off")
-plt.tight_layout(pad = 0)
-st.pyplot()
+   
+    # Create figure
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    # Display word cloud
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+
+    # Remove extra padding
+    fig.tight_layout(pad=0)
+
+    # Display in Streamlit
+    st.pyplot(fig)
+  wordcloud_bysector(selected_sector)  
+
 
 st.header('Area Vs Price')
 
