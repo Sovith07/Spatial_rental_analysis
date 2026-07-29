@@ -192,3 +192,5 @@ cython_debug/
 .pypirc
 
 app/latlong.csv
+app/wordcloud.csv
+app/data_viz1.csv
